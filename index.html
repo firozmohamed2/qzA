@@ -14,7 +14,7 @@
     let questionsData; // Global variable to store quiz data
 
     // Fetch the text file
-    fetch('questions.txt')
+    fetch('dutch.txt')
       .then(response => response.text())
       .then(data => {
         questionsData = parseQuizData(data);
