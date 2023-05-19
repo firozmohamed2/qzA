@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Program</title>
+</head>
+<body>
+  <h1>Quiz Program</h1>
+  <div id="quiz"></div>
+  <input type="file" id="fileInput">
+  <button onclick="loadCustomFile()">Load Custom File</button>
+
+
+  <script>
+    let questionsData; // Global variable to store quiz data
+
+    // Fetch the text file
+    fetch('questions.txt')
+      .then(response => response.text())
+      .then(data => {
+        questionsData = parseQuizData(data);
+        createQuiz(questionsData);
+      })
+      .catch(error => console.error(error));
+
+    // Parse the quiz data from text file
+    function parseQuizData(data) {
+      const lines = data.split('\n');
+      let questions = [];
+      let currentQuestion = {};
+
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine !== '') {
+          if (trimmedLine.startsWith('Q')) {
+            currentQuestion.question = trimmedLine.substring(2);
+          } else if (trimmedLine.startsWith('A')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+
+          else if (trimmedLine.startsWith('B')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+          else if (trimmedLine.startsWith('C')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+
+          else if (trimmedLine.startsWith('D')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+
+
+          
+
+
+          
+          else if (trimmedLine.startsWith('Z')) {
+            var correctOption = trimmedLine.substring(2);
+
+            switch (correctOption) {
+                case 'a' : currentQuestion.answer = currentQuestion.options[0]; break;
+                case 'b' : currentQuestion.answer = currentQuestion.options[1]; break;
+                case 'c' : currentQuestion.answer = currentQuestion.options[2]; break;
+                default : currentQuestion.answer = currentQuestion.options[3]; break;
+
+            }
+            // currentQuestion.answer = trimmedLine.substring(15);
+            shuffleArray(currentQuestion.options);
+
+            questions.push(currentQuestion);
+            currentQuestion = {};
+          }
+        }
+      });
+
+      return questions;
+    }
+
+    // Create the quiz
+    function createQuiz(questions) {
+
+      shuffleArray(questions);
+
+
+      const quizContainer = document.getElementById('quiz');
+      let quizHTML = '';
+
+      questions.forEach((question, index) => {
+        const optionsHTML = question.options.map((option, optionIndex) => `
+          <label>
+            <input type="radio" class="" name="question${index}" value="${option}" onclick="checkAnswer(${index}, '${option}')">
+            ${option}
+          </label>
+        `).join('');
+
+        
+
+        const questionHTML = `
+          <div>
+            <h2>Question ${index + 1}</h2>
+            <p>${question.question}</p>
+            <div>
+              ${optionsHTML}
+            </div>
+            <p id="feedback${index}"></p>
+          </div>
+        `;
+
+        quizHTML += questionHTML;
+      });
+
+      quizContainer.innerHTML = quizHTML;
+    }
+
+    // Check the answer
+    function checkAnswer(questionIndex, selectedOption) {
+      const question = questionsData[questionIndex];
+      const feedbackElement = document.getElementById(`feedback${questionIndex}`);
+
+      console.log(question.answer + " " + selectedOption);
+
+      if (selectedOption === question.answer) {
+        feedbackElement.textContent = 'Correct!';
+        feedbackElement.style.color = 'green';
+      } else {
+        feedbackElement.textContent = 'Wrong!';
+        feedbackElement.style.color = 'red';
+      }
+    }
+
+
+
+    function loadCustomFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const fileData = event.target.result;
+        questionsData = parseQuizData(fileData);
+        createQuiz(questionsData);
+      };
+
+      reader.onerror = function(event) {
+        console.error('Error reading file:', event.target.error);
+      };
+
+      reader.readAsText(file);
+    }
+
+
+
+
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    
+
+
+
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Q and Z</title>
+  <style>
+    textarea {
+      width: 400px;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Add Q and Z</h2>
+  <textarea id="inputText" placeholder="Paste your text here"></textarea>
+  <br>
+  <button onclick="processText()">Process</button>
+  <button onclick="copyText()" id="copyButton" disabled>Copy</button>
+  <br>
+  <textarea id="outputText" placeholder="Modified text will appear here" readonly></textarea>
+
+  <script>
+    function addQAndZ(text) {
+      var lines = text.split('\n');
+      var result = [];
+      var previousLineEmpty = false;
+
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.trim() === '') {
+          result.push('Z a');
+          previousLineEmpty = true;
+        } else if (!line.match(/^[A-D]\)/)) {
+          result.push('Q ' + line);
+          previousLineEmpty = false;
+        } else {
+          result.push(line);
+          previousLineEmpty = false;
+        }
+      }
+
+      return result.join('\n');
+    }
+
+    function processText() {
+      var inputText = document.getElementById('inputText').value;
+      var outputText = document.getElementById('outputText');
+      var copyButton = document.getElementById('copyButton');
+
+      var modifiedText = addQAndZ(inputText);
+      outputText.value = modifiedText;
+
+      if (modifiedText !== '') {
+        copyButton.disabled = false;
+      } else {
+        copyButton.disabled = true;
+      }
+    }
+
+    function copyText() {
+      var outputText = document.getElementById('outputText');
+      outputText.select();
+      document.execCommand('copy');
+    }
+  </script>
+</body>
+</html>
