@@ -29,7 +29,7 @@
         if (line.trim() === '') {
           result.push('Z a');
           previousLineEmpty = true;
-        } else if (!line.match(/^[A-D]\)/)) {
+        } else if (!line.match(/^[A-D]\)/) && !line.match(/^[a-d]\)/) ) {
           result.push('Q ' + line);
           previousLineEmpty = false;
         } else {
