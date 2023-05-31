@@ -8,13 +8,17 @@
   <div id="quiz"></div>
   <input type="file" id="fileInput">
   <button onclick="loadCustomFile()">Load Custom File</button>
+  <button onclick="refreshQuestions()">Refresh Questions</button>
+  <button onclick="showQuestionStatus()">Show Question Status</button>
+
+
 
 
   <script>
     let questionsData; // Global variable to store quiz data
 
     // Fetch the text file
-    fetch('dutch.txt')
+    fetch('questions.txt')
       .then(response => response.text())
       .then(data => {
         questionsData = parseQuizData(data);
@@ -39,8 +43,20 @@
             }
             currentQuestion.options.push(trimmedLine.substring(3));
           }
+          else if (trimmedLine.startsWith('a')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
 
           else if (trimmedLine.startsWith('B')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+          else if (trimmedLine.startsWith('b')) {
             if (!currentQuestion.options) {
               currentQuestion.options = [];
             }
@@ -52,8 +68,20 @@
             }
             currentQuestion.options.push(trimmedLine.substring(3));
           }
+          else if (trimmedLine.startsWith('c')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
 
           else if (trimmedLine.startsWith('D')) {
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine.substring(3));
+          }
+          else if (trimmedLine.startsWith('d')) {
             if (!currentQuestion.options) {
               currentQuestion.options = [];
             }
@@ -80,6 +108,9 @@
 
             questions.push(currentQuestion);
             currentQuestion = {};
+          }
+          else {
+            
           }
         }
       });
@@ -169,6 +200,61 @@
         [array[i], array[j]] = [array[j], array[i]];
       }
     }
+
+
+
+    function refreshQuestions() {
+      fetch('questions.txt')
+        .then(response => response.text())
+        .then(data => {
+          questionsData = parseQuizData(data);
+          createQuiz(questionsData);
+        })
+        .catch(error => console.error(error));
+    }
+
+
+
+    function showQuestionStatus() {
+      const quizContainer = document.getElementById('quiz');
+      let statusHTML = '';
+
+      const rightQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return selectedOption && selectedOption.value === question.answer;
+      });
+
+      const wrongQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return selectedOption && selectedOption.value !== question.answer;
+      });
+
+      const unansweredQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return !selectedOption;
+      });
+
+      statusHTML += `<h2>Right Questions</h2>`;
+      rightQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      statusHTML += `<h2>Wrong Questions</h2>`;
+      wrongQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      statusHTML += `<h2>Unanswered Questions</h2>`;
+      unansweredQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      quizContainer.innerHTML = statusHTML;
+    }
+
+
+
+
 
     
 
