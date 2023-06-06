@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Program</title>
+</head>
+<body>
+  <h1>Quiz Program</h1>
+  <div id="quiz"></div>
+  <input type="file" id="fileInput">
+  <input type="file" id="optionsFileInput">
+  <button onclick="loadCustomFiles()">Load Custom Files</button>
+  <button onclick="refreshQuestions()">Refresh Questions</button>
+  <button onclick="showQuestionStatus()">Show Question Status</button>
+
+  <script>
+    let questionsData; // Global variable to store quiz data
+    let optionsData; // Global variable to store answer options
+
+   
+
+    // Parse the quiz data from the question text file
+    function parseQuizData(data, optionData) {
+      const lines = data.split('\n');
+      let questions = [];
+      let currentQuestion = {};
+
+      const optionLines = optionData.split('\n');
+      let options = [];
+
+
+      optionLines.forEach(line => {
+        const trimmedLine = line.trim();
+        options.push(trimmedLine);
+      })
+
+
+
+      var i=0;
+
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        
+
+        if(i%2 == 0) {
+            currentQuestion.question = trimmedLine;
+        }
+        else{
+            if (!currentQuestion.options) {
+              currentQuestion.options = [];
+            }
+            currentQuestion.options.push(trimmedLine);
+            currentQuestion.options.push(options[Math.floor(Math.random()*options.length)]);
+            currentQuestion.options.push(options[Math.floor(Math.random()*options.length)]);
+            currentQuestion.options.push(options[Math.floor(Math.random()*options.length)]);
+
+            currentQuestion.answer = currentQuestion.options[0];
+
+
+            shuffleArray(currentQuestion.options);
+
+            questions.push(currentQuestion);
+            currentQuestion = {};
+
+
+        }
+
+
+        i++;
+    
+    });
+
+      return questions;
+    }
+
+    // Parse the answer options data from the options text file
+    function parseOptionsData(data) {
+      return data.split('\n').map(option => option.trim()).filter(option => option !== '');
+    }
+
+    // Create the quiz
+    function createQuiz(questions) {
+
+
+
+        shuffleArray(questions);
+
+
+        const quizContainer = document.getElementById('quiz');
+        let quizHTML = '';
+
+        questions.forEach((question, index) => {
+        const optionsHTML = question.options.map((option, optionIndex) => `
+            <label>
+            <input type="radio" class="" name="question${index}" value="${option}" onclick="checkAnswer(${index}, '${option}')">
+            ${option}
+            </label>
+        `).join('');
+
+  
+
+            const questionHTML = `
+                <div>
+                <h2>Question ${index + 1}</h2>
+                <p>${question.question}</p>
+                <div>
+                    ${optionsHTML}
+                </div>
+                <p id="feedback${index}"></p>
+                </div>
+            `;
+
+            quizHTML += questionHTML;
+            });
+
+            quizContainer.innerHTML = quizHTML;
+
+
+
+
+
+    }
+
+  
+    // Check the answer
+    function checkAnswer(questionIndex, selectedOption) {
+      const question = questionsData[questionIndex];
+      const feedbackElement = document.getElementById(`feedback${questionIndex}`);
+
+      if (selectedOption === question.answer) {
+        feedbackElement.textContent = 'Correct!';
+        feedbackElement.style.color = 'green';
+      } else {
+        feedbackElement.textContent = 'Wrong!';
+        feedbackElement.style.color = 'red';
+      }
+    }
+
+    // Shuffle an array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+
+      return array;
+    }
+
+    // Load custom files
+    function loadCustomFiles() {
+      const fileInput = document.getElementById('fileInput');
+      const optionsFileInput = document.getElementById('optionsFileInput');
+      const file = fileInput.files[0];
+      const optionsFile = optionsFileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const fileData = event.target.result;
+
+
+//new FileReader
+
+        const optionsReader = new FileReader();
+
+      optionsReader.onload = function(event) {
+        const optionsFileData = event.target.result;
+        //optionsData = parseOptionsData(optionsFileData);
+        questionsData = parseQuizData(fileData, optionsFileData);
+        createQuiz(questionsData);
+      };
+
+      optionsReader.onerror = function(event) {
+        console.error('Error reading options file:', event.target.error);
+      };
+
+      optionsReader.readAsText(optionsFile);
+
+//new fileReader
+
+
+        
+      };
+
+      reader.onerror = function(event) {
+        console.error('Error reading file:', event.target.error);
+      };
+
+      reader.readAsText(file);
+
+      
+    }
+
+    // Refresh questions from the question text file
+    function refreshQuestions() {
+      fetchQuestions();
+    }
+
+    // Show question status
+    function showQuestionStatus() {
+      const quizContainer = document.getElementById('quiz');
+      let statusHTML = '';
+
+      const rightQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return selectedOption && selectedOption.value === question.answer;
+      });
+
+      const wrongQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return selectedOption && selectedOption.value !== question.answer;
+      });
+
+      const unansweredQuestions = questionsData.filter(question => {
+        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
+        return !selectedOption;
+      });
+
+      statusHTML += `<h2>Right Questions</h2>`;
+      rightQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      statusHTML += `<h2>Wrong Questions</h2>`;
+      wrongQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      statusHTML += `<h2>Unanswered Questions</h2>`;
+      unansweredQuestions.forEach(question => {
+        statusHTML += `<p>${question.question}</p>`;
+      });
+
+      quizContainer.innerHTML = statusHTML;
+    }
+
+    // Fetch questions and answer options on page load
+    // fetchQuestions();
+    // fetchOptions();
+  </script>
+</body>
+</html>
