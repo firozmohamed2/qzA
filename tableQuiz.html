@@ -67,7 +67,7 @@
       font-weight: bold;
     }
 
-    #nextBtn {
+    #nextBtn, #restartBtn {
       display: none;
       margin-top: 20px;
       padding: 10px 20px;
@@ -86,6 +86,7 @@
     <div id="score" class="score"></div>
     <div id="quizCompleted" class="quiz-completed"></div>
     <button id="nextBtn">Next</button>
+    <button id="restartBtn">Restart Quiz</button>
   </div>
 
   <script>
@@ -99,8 +100,10 @@
     var scoreElement = document.getElementById("score");
     var quizCompletedElement = document.getElementById("quizCompleted");
     var nextBtn = document.getElementById("nextBtn");
+    var restartBtn = document.getElementById("restartBtn");
 
     nextBtn.addEventListener("click", showNextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
 
     generateQuestions();
 
@@ -230,6 +233,16 @@
       scoreElement.textContent = "";
       quizCompletedElement.textContent = "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
       nextBtn.style.display = "none";
+      restartBtn.style.display = "block";
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      resetOptions();
+      showQuestion(questions[currentQuestion]);
+      quizCompletedElement.textContent = "";
+      restartBtn.style.display = "none";
     }
   </script>
 </body>
