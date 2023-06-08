@@ -26,23 +26,13 @@
       font-size: 24px;
     }
 
-    #options {
-      display: flex;
-      flex-direction: column;
-    }
-
-    button.option {
+    #answerInput {
       margin-bottom: 10px;
       padding: 10px;
-      border: none;
-      background-color: #eee;
-      text-align: center;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
       font-size: 16px;
-      cursor: pointer;
-    }
-
-    button.option:hover {
-      background-color: #ccc;
     }
 
     .correct {
@@ -85,27 +75,27 @@
       }
 
       h1 {
-        font-size: 30px;
+        font-size: 20px;
       }
 
       #question {
-        font-size: 30px;
+        font-size: 18px;
       }
 
-      button.option {
-        padding: 8px;
-        font-size: 30px;
+      #answerInput {
+        font-size: 14px;
       }
 
       .score,
       .quiz-completed {
-        font-size: 25px;
+        font-size: 16px;
       }
 
       #nextBtn,
+      #submitBtn,
       #restartBtn {
-        padding: 12px 16px;
-        font-size: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
       }
     }
   </style>
@@ -114,7 +104,9 @@
   <div class="container">
     <h1>Math Quiz</h1>
     <div id="question"></div>
-    <div id="options"></div>
+    <input type="text" id="answerInput" placeholder="Enter your answer" />
+    <p id="correct_text"></p>
+    <button id="submitBtn">Submit</button>
     <div id="score" class="score"></div>
     <div id="quizCompleted" class="quiz-completed"></div>
     <button id="nextBtn">Next</button>
@@ -128,12 +120,15 @@
     var questions = [];
 
     var questionElement = document.getElementById("question");
-    var optionsElement = document.getElementById("options");
+    var correctText = document.getElementById("correct_text");
+    var answerInput = document.getElementById("answerInput");
+    var submitBtn = document.getElementById("submitBtn");
     var scoreElement = document.getElementById("score");
     var quizCompletedElement = document.getElementById("quizCompleted");
     var nextBtn = document.getElementById("nextBtn");
     var restartBtn = document.getElementById("restartBtn");
 
+    submitBtn.addEventListener("click", checkAnswer);
     nextBtn.addEventListener("click", showNextQuestion);
     restartBtn.addEventListener("click", restartQuiz);
 
@@ -145,26 +140,12 @@
           var question = {
             question: i + " x " + j + " = ?",
             answer: i * j,
-            options: generateOptions(i * j),
           };
           questions.push(question);
         }
       }
       shuffleArray(questions);
       showQuestion(questions[currentQuestion]);
-    }
-
-    function generateOptions(answer) {
-      var options = [answer];
-
-      while (options.length < 4) {
-        var option = getRandomNumber(answer - 5, answer + 5);
-        if (options.indexOf(option) === -1) {
-          options.push(option);
-        }
-      }
-
-      return shuffleArray(options);
     }
 
     function shuffleArray(array) {
@@ -179,79 +160,52 @@
 
     function showQuestion(question) {
       questionElement.textContent = question.question;
+      answerInput.value = "";
+      answerInput.focus();
+    }
 
-      optionsElement.innerHTML = "";
-      for (var i = 0; i < question.options.length; i++) {
-        var option = document.createElement("button");
-        option.textContent = question.options[i];
-        option.classList.add("option");
-        option.addEventListener("click", selectOption);
-        optionsElement.appendChild(option);
+    function checkAnswer() {
+      var answer = answerInput.value.trim();
+      if (answer !== "") {
+        var question = questions[currentQuestion];
+        if (parseInt(answer) === question.answer) {
+          answerInput.classList.add("correct");
+          score++;
+        } else {
+          answerInput.classList.add("wrong");
+          correctText.innerHTML="correct answer :" +question.answer;
+        }
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+        showNextButton();
+        scoreElement.textContent = "Score: " + score + "/" + numQuestions;
       }
     }
 
-    function selectOption(e) {
-      var selectedOption = e.target;
-      var options = optionsElement.getElementsByTagName("button");
-
-      for (var i = 0; i < options.length; i++) {
-        options[i].disabled = true;
-        options[i].style.pointerEvents = "none";
-        options[i].style.opacity = "0.6";
-      }
-
-      selectedOption.style.opacity = "1";
-      selectedOption.style.pointerEvents = "auto";
-
-      var answer = parseInt(selectedOption.textContent);
-      var question = questions[currentQuestion];
-
-      if (answer === question.answer) {
-        selectedOption.classList.add("correct");
-        score++;
-      } else {
-        selectedOption.classList.add("wrong");
-
-        // Highlight the correct answer in green
-        for (var i = 0; i < options.length; i++) {
-          if (parseInt(options[i].textContent) === question.answer) {
-            options[i].classList.add("correct");
-            break;
-          }
-        }
-      }
-
-      scoreElement.textContent = "Score: " + score + "/" + numQuestions;
-
+    function showNextButton() {
       nextBtn.style.display = "block";
+      nextBtn.focus();
     }
 
     function showNextQuestion() {
       currentQuestion++;
       if (currentQuestion < numQuestions) {
-        resetOptions();
         showQuestion(questions[currentQuestion]);
+        answerInput.classList.remove("correct", "wrong");
+        answerInput.disabled = false;
+        submitBtn.disabled = false;
         nextBtn.style.display = "none";
+        correctText.innerHTML="";
       } else {
+        correctText.innerHTML="";
         showFinalScore();
-      }
-    }
-
-    function resetOptions() {
-      var options = optionsElement.getElementsByTagName("button");
-
-      for (var i = 0; i < options.length; i++) {
-        options[i].disabled = false;
-        options[i].style.pointerEvents = "auto";
-        options[i].style.opacity = "1";
-        options[i].classList.remove("correct");
-        options[i].classList.remove("wrong");
       }
     }
 
     function showFinalScore() {
       questionElement.textContent = "";
-      optionsElement.innerHTML = "";
+      answerInput.style.display = "none";
+      submitBtn.style.display = "none";
       scoreElement.textContent = "";
       quizCompletedElement.textContent =
         "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
@@ -264,13 +218,15 @@
       score = 0;
       questions = [];
       generateQuestions();
-      restartBtn.style.display = "none";
+      answerInput.style.display = "block";
+      answerInput.classList.remove("correct", "wrong");
+      answerInput.disabled = false;
+      answerInput.value = "";
+      submitBtn.style.display = "block";
+      submitBtn.disabled = false;
       quizCompletedElement.textContent = "";
       scoreElement.textContent = "Score: 0/" + numQuestions;
-    }
-
-    function getRandomNumber(min, max) {
-      return Math.floor(Math.random() * (max - min + 1) + min);
+      restartBtn.style.display = "none";
     }
   </script>
 </body>
