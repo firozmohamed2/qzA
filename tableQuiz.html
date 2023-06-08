@@ -68,7 +68,8 @@
       font-weight: bold;
     }
 
-    #nextBtn, #restartBtn {
+    #nextBtn,
+    #restartBtn {
       display: none;
       margin-top: 20px;
       padding: 10px 20px;
@@ -88,7 +89,7 @@
       }
 
       #question {
-        font-size: 38px;
+        font-size: 30px;
       }
 
       button.option {
@@ -96,13 +97,15 @@
         font-size: 30px;
       }
 
-      .score, .quiz-completed {
-        font-size: 16px;
+      .score,
+      .quiz-completed {
+        font-size: 25px;
       }
 
-      #nextBtn, #restartBtn {
-        padding: 8px 16px;
-        font-size: 14px;
+      #nextBtn,
+      #restartBtn {
+        padding: 12px 16px;
+        font-size: 20px;
       }
     }
   </style>
@@ -117,8 +120,6 @@
     <button id="nextBtn">Next</button>
     <button id="restartBtn">Restart Quiz</button>
   </div>
-
-  
 
   <script>
     var currentQuestion = 0;
@@ -139,32 +140,22 @@
     generateQuestions();
 
     function generateQuestions() {
-      for (var i = 0; i < numQuestions; i++) {
-        var num1 = getRandomNumber(2, 10);
-        var num2 = getRandomNumber(2, 10);
-        var answer = num1 * num2;
-
-        var options = generateOptions(answer);
-
-        var question = {
-          question: num1 + " x " + num2 + " =",
-          options: options,
-          answer: answer
-        };
-
-        questions.push(question);
+      for (var i = 2; i <= 10; i++) {
+        for (var j = 1; j <= 10; j++) {
+          var question = {
+            question: i + " x " + j + " = ?",
+            answer: i * j,
+            options: generateOptions(i * j),
+          };
+          questions.push(question);
+        }
       }
-
+      shuffleArray(questions);
       showQuestion(questions[currentQuestion]);
     }
 
-    function getRandomNumber(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
     function generateOptions(answer) {
-      var options = [];
-      options.push(answer);
+      var options = [answer];
 
       while (options.length < 4) {
         var option = getRandomNumber(answer - 5, answer + 5);
@@ -262,7 +253,8 @@
       questionElement.textContent = "";
       optionsElement.innerHTML = "";
       scoreElement.textContent = "";
-      quizCompletedElement.textContent = "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
+      quizCompletedElement.textContent =
+        "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
       nextBtn.style.display = "none";
       restartBtn.style.display = "block";
     }
@@ -270,10 +262,15 @@
     function restartQuiz() {
       currentQuestion = 0;
       score = 0;
-      resetOptions();
-      showQuestion(questions[currentQuestion]);
-      quizCompletedElement.textContent = "";
+      questions = [];
+      generateQuestions();
       restartBtn.style.display = "none";
+      quizCompletedElement.textContent = "";
+      scoreElement.textContent = "Score: 0/" + numQuestions;
+    }
+
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1) + min);
     }
   </script>
 </body>
