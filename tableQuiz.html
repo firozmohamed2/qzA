@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Math Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -76,6 +77,34 @@
       font-size: 16px;
       cursor: pointer;
     }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      #question {
+        font-size: 38px;
+      }
+
+      button.option {
+        padding: 8px;
+        font-size: 30px;
+      }
+
+      .score, .quiz-completed {
+        font-size: 16px;
+      }
+
+      #nextBtn, #restartBtn {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -88,6 +117,8 @@
     <button id="nextBtn">Next</button>
     <button id="restartBtn">Restart Quiz</button>
   </div>
+
+  
 
   <script>
     var currentQuestion = 0;
