@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Math Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #question {
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    #options {
+      display: flex;
+      flex-direction: column;
+    }
+
+    button.option {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: none;
+      background-color: #eee;
+      text-align: center;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button.option:hover {
+      background-color: #ccc;
+    }
+
+    .correct {
+      color: green;
+      background-color: #cdeccb;
+    }
+
+    .wrong {
+      color: red;
+      background-color: #f5c5c5;
+    }
+
+    .score {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .quiz-completed {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #nextBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #ccc;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Math Quiz</h1>
+    <div id="question"></div>
+    <div id="options"></div>
+    <div id="score" class="score"></div>
+    <div id="quizCompleted" class="quiz-completed"></div>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    var currentQuestion = 0;
+    var score = 0;
+    var numQuestions = 10;
+    var questions = [];
+
+    var questionElement = document.getElementById("question");
+    var optionsElement = document.getElementById("options");
+    var scoreElement = document.getElementById("score");
+    var quizCompletedElement = document.getElementById("quizCompleted");
+    var nextBtn = document.getElementById("nextBtn");
+
+    nextBtn.addEventListener("click", showNextQuestion);
+
+    generateQuestions();
+
+    function generateQuestions() {
+      for (var i = 0; i < numQuestions; i++) {
+        var num1 = getRandomNumber(2, 10);
+        var num2 = getRandomNumber(2, 10);
+        var answer = num1 * num2;
+
+        var options = generateOptions(answer);
+
+        var question = {
+          question: num1 + " x " + num2 + " =",
+          options: options,
+          answer: answer
+        };
+
+        questions.push(question);
+      }
+
+      showQuestion(questions[currentQuestion]);
+    }
+
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateOptions(answer) {
+      var options = [];
+      options.push(answer);
+
+      while (options.length < 4) {
+        var option = getRandomNumber(answer - 5, answer + 5);
+        if (options.indexOf(option) === -1) {
+          options.push(option);
+        }
+      }
+
+      return shuffleArray(options);
+    }
+
+    function shuffleArray(array) {
+      for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+      return array;
+    }
+
+    function showQuestion(question) {
+      questionElement.textContent = question.question;
+
+      optionsElement.innerHTML = "";
+      for (var i = 0; i < question.options.length; i++) {
+        var option = document.createElement("button");
+        option.textContent = question.options[i];
+        option.classList.add("option");
+        option.addEventListener("click", selectOption);
+        optionsElement.appendChild(option);
+      }
+    }
+
+    function selectOption(e) {
+      var selectedOption = e.target;
+      var options = optionsElement.getElementsByTagName("button");
+
+      for (var i = 0; i < options.length; i++) {
+        options[i].disabled = true;
+        options[i].style.pointerEvents = "none";
+        options[i].style.opacity = "0.6";
+      }
+
+      selectedOption.style.opacity = "1";
+      selectedOption.style.pointerEvents = "auto";
+
+      var answer = parseInt(selectedOption.textContent);
+      var question = questions[currentQuestion];
+
+      if (answer === question.answer) {
+        selectedOption.classList.add("correct");
+        score++;
+      } else {
+        selectedOption.classList.add("wrong");
+
+        // Highlight the correct answer in green
+        for (var i = 0; i < options.length; i++) {
+          if (parseInt(options[i].textContent) === question.answer) {
+            options[i].classList.add("correct");
+            break;
+          }
+        }
+      }
+
+      scoreElement.textContent = "Score: " + score + "/" + numQuestions;
+
+      nextBtn.style.display = "block";
+    }
+
+    function showNextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < numQuestions) {
+        resetOptions();
+        showQuestion(questions[currentQuestion]);
+        nextBtn.style.display = "none";
+      } else {
+        showFinalScore();
+      }
+    }
+
+    function resetOptions() {
+      var options = optionsElement.getElementsByTagName("button");
+
+      for (var i = 0; i < options.length; i++) {
+        options[i].disabled = false;
+        options[i].style.pointerEvents = "auto";
+        options[i].style.opacity = "1";
+        options[i].classList.remove("correct");
+        options[i].classList.remove("wrong");
+      }
+    }
+
+    function showFinalScore() {
+      questionElement.textContent = "";
+      optionsElement.innerHTML = "";
+      scoreElement.textContent = "";
+      quizCompletedElement.textContent = "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
+      nextBtn.style.display = "none";
+    }
+  </script>
+</body>
+</html>
