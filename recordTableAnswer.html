@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Math Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #question {
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    #answer {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .correct {
+      color: green;
+      background-color: #cdeccb;
+    }
+
+    .wrong {
+      color: red;
+      background-color: #f5c5c5;
+    }
+
+    .score {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .quiz-completed {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #restartBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #ccc;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+
+
+
+
+
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      #question {
+        font-size: 18px;
+      }
+
+      #answer {
+        font-size: 14px;
+      }
+
+      .score,
+      .quiz-completed {
+        font-size: 16px;
+      }
+
+
+      #restartBtn {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Math Quiz</h1>
+    <div id="question"></div>
+    <div id="answer"></div>
+    <button id="startBtn">
+        record
+    </button>
+    <div id="timer" class="score"></div>
+    <div id="score" class="score"></div>
+    <div id="quizCompleted" class="quiz-completed"></div>
+    <!-- <button id="nextBtn">Next</button> -->
+    <button id="restartBtn">Restart Quiz</button>
+  </div>
+
+  <script>
+    var currentQuestion = 0;
+    var score = 0;
+    var numQuestions = 10;
+    var questions = [];
+    var timerDuration = 10; // Timer duration in seconds
+    var timerInterval;
+
+    var questionElement = document.getElementById("question");
+    var answerElement = document.getElementById("answer");
+    var startBtn = document.getElementById("startBtn");
+    var timerElement = document.getElementById("timer");
+    var scoreElement = document.getElementById("score");
+    var quizCompletedElement = document.getElementById("quizCompleted");
+    // var nextBtn = document.getElementById("nextBtn");
+    var restartBtn = document.getElementById("restartBtn");
+
+    startBtn.addEventListener("click", startVoiceRecognition);
+    // nextBtn.addEventListener("click", showNextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    generateQuestions();
+
+    function generateQuestions() {
+      for (var i = 2; i <= 10; i++) {
+        for (var j = 1; j <= 10; j++) {
+          var question = {
+            question: i + " x " + j + " = ?",
+            answer: i * j,
+          };
+          questions.push(question);
+        }
+      }
+      shuffleArray(questions);
+      showQuestion(questions[currentQuestion]);
+    }
+
+    function shuffleArray(array) {
+      for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+      return array;
+    }
+
+    function showQuestion(question) {
+      questionElement.textContent = question.question;
+      startBtn.disabled = false;
+      startTimer();
+    }
+
+    function startTimer() {
+      var timeLeft = timerDuration;
+      timerElement.textContent = "Time Left: " + timeLeft + "s";
+
+      timerInterval = setInterval(function () {
+        timeLeft--;
+        timerElement.textContent = "Time Left: " + timeLeft + "s";
+
+        if (timeLeft === 0) {
+          clearInterval(timerInterval);
+          showNextQuestion();
+        }
+      }, 1000);
+    }
+
+    function startVoiceRecognition() {
+      startBtn.disabled = true;
+      var recognition = new webkitSpeechRecognition() || SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onresult = function (event) {
+        var result = event.results[0][0].transcript;
+        checkAnswer(result);
+      };
+
+      recognition.start();
+    }
+
+    function checkAnswer(answer) {
+  var question = questions[currentQuestion];
+  var expectedAnswer = question.answer.toString();
+
+  answerElement.textContent = "You said: " + answer;
+  answerElement.style.display = "block";
+
+  if (answer.trim() === expectedAnswer) {
+    questionElement.classList.add("correct");
+    score++;
+   
+  } else {
+    questionElement.classList.add("wrong");
+   
+    var correctAnswer = "Correct Answer: " + expectedAnswer;
+    answerElement.insertAdjacentHTML("beforeend", "<br>" + correctAnswer);
+  }
+  scoreElement.textContent = "Score: " + score + "/" + numQuestions;
+}
+
+    
+    function showNextQuestion() {
+      clearInterval(timerInterval);
+      currentQuestion++;
+      if (currentQuestion < numQuestions) {
+        showQuestion(questions[currentQuestion]);
+        questionElement.classList.remove("correct", "wrong");
+        answerElement.textContent = "";
+        answerElement.style.display = "none";
+      
+      } else {
+        showFinalScore();
+      }
+    }
+
+    function showFinalScore() {
+      questionElement.textContent = "";
+      startBtn.style.display = "none";
+      answerElement.textContent = "";
+      answerElement.style.display = "none";
+      scoreElement.textContent =
+        "Quiz Completed! Your Score: " + score + " out of " + numQuestions;
+      timerElement.textContent = "";
+     
+      restartBtn.style.display = "block";
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      questions = [];
+      generateQuestions();
+      startBtn.style.display = "block";
+      scoreElement.textContent = "Score: 0/" + numQuestions;
+      restartBtn.style.display = "none";
+    }
+
+
+    
+
+
+
+  </script>
+</body>
+</html>
