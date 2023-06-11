@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF Text Extraction</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
+</head>
+<body>
+  <input type="file" id="pdfFile" accept=".pdf" />
+  <button onclick="extractText()">Extract Text</button>
+  <div id="output"></div>
+  <div id="spinner" style="display: none;">Converting...</div>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.worker.min.js';
+
+    function extractText() {
+      var fileInput = document.getElementById('pdfFile');
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        var buffer = new Uint8Array(e.target.result);
+        
+        pdfjsLib.getDocument(buffer).promise.then(function(pdf) {
+          var numPages = pdf.numPages;
+          var extractedText = '';
+          var counter = 0;
+
+          var spinnerDiv = document.getElementById('spinner');
+          spinnerDiv.style.display = 'block';
+
+          for (var i = 1; i <= numPages; i++) {
+            pdf.getPage(i).then(function(page) {
+              page.getTextContent().then(function(textContent) {
+                textContent.items.forEach(function(item) {
+                  extractedText += item.str + ' ';
+                });
+
+                counter++;
+
+                if (counter === numPages) {
+                  var outputDiv = document.getElementById('output');
+                  outputDiv.textContent = extractedText;
+                  spinnerDiv.style.display = 'none';
+                }
+              });
+            });
+          }
+        });
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  </script>
+</body>
+</html>
