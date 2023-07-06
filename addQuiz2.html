@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz App</title>
+  <style>
+    #quizForm {
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="submit"] {
+      margin-top: 10px;
+    }
+
+    textarea {
+      width: 400px;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quiz App</h1>
+
+  <form id="quizForm">
+    <label>Enter the questions (separated by commas):</label>
+    <input type="text" id="questionsInput" required>
+
+    <label>Enter the common answer:</label>
+    <input type="text" id="answerInput" required>
+
+    <label>Enter the options (separated by commas):</label>
+    <input type="text" id="optionsInput" required>
+
+    <input type="submit" value="Submit">
+  </form>
+
+  <div id="quizOutput" style="display: none;">
+    <h2>Quiz Questions:</h2>
+    <div>
+      <textarea id="outputText" placeholder="Modified text will appear here" readonly></textarea>
+      <button id="copyButton">Copy</button>
+    </div>
+    <ul id="questionList"></ul>
+  </div>
+
+  <script>
+    document.getElementById("quizForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Get input values
+      var questionsInput = document.getElementById("questionsInput").value.trim();
+      var answerInput = document.getElementById("answerInput").value.trim();
+      var optionsInput = document.getElementById("optionsInput").value.trim();
+
+      var questionsCopy = document.getElementById("outputText");
+
+      // Split inputs into arrays
+      var questions = questionsInput.split(",");
+      var answer = answerInput;
+      var options = optionsInput.split(",").map(option => option.trim());
+
+      // Generate random question with options
+      var quizOutput = document.getElementById("quizOutput");
+      var questionList = document.getElementById("questionList");
+
+      // Clear previous questions
+      questionList.innerHTML = "";
+
+      var qText="";
+
+      // Generate new questions
+      questions.forEach(function(question) {
+        var randomizedOptions = shuffle(options.slice()); // Copy and shuffle options array
+      
+
+
+       // Shuffling the options array
+var shuffledOptions = options.slice().sort(function() { return 0.5 - Math.random(); });
+
+    var optionB= shuffledOptions[0] != answerInput ? shuffledOptions[0] : shuffledOptions[3];
+    var optionC= shuffledOptions[1] != answerInput ? shuffledOptions[1] : shuffledOptions[3];
+    var optionD= shuffledOptions[2] != answerInput ? shuffledOptions[2] : shuffledOptions[3];
+
+
+// Generating the question with unique options
+var txt2 = "Q " + question + "\n A) " + answerInput 
+          + "\n B) " + optionB
+          + "\n C) " + optionC
+          + "\n D) " + optionD
+          + "\n Z " + "a \n";
+
+
+        qText += txt2;
+      });
+
+      questionsCopy.value = qText;
+
+      // Show quiz output
+      quizOutput.style.display = "block";
+    });
+
+    // Function to shuffle an array
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+
+      // While there remain elements to shuffle
+      while (0 !== currentIndex) {
+        // Pick a remaining element
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // Swap with current element
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+    // Copy button functionality
+    document.getElementById("copyButton").addEventListener("click", function() {
+      var outputText = document.getElementById("outputText");
+      outputText.select();
+      document.execCommand("copy");
+    });
+  </script>
+</body>
+</html>
