@@ -2,34 +2,55 @@
 <html>
 <head>
   <title>Quiz Program</title>
+  <style>
+    .bottom-navigation {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f1f1f1;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .bottom-navigation button {
+      margin: 0 5px;
+    }
+    #quiz{
+      margin-bottom: 60px;
+    }
+  </style>
 </head>
 <body>
   <h1>Quiz Program</h1>
   <div id="quiz"></div>
-  <input type="file" id="fileInput">
-  <button onclick="loadCustomFile()">Load Custom File</button>
-  <button onclick="refreshQuestions()">Refresh Questions</button>
-  <button onclick="showQuestionStatus()">Show Question Status</button>
+ 
+  <div class="bottom-navigation">
+    <input type="file" id="fileInput">
+    <button onclick="loadCustomFile()">Load Custom File</button>
+    <button onclick="refreshQuestions()">Refresh Questions</button>
+    <button onclick="showQuestionStatus()">Show Question Status</button>
+    <button onclick="showWrongQuestions()">Show Wrong Questions</button>
+  </div>
+
 
 
 
 
   <script>
     let questionsData; // Global variable to store quiz data
+    const quizContainer = document.getElementById('quiz');
+    var lastAddedWrongIndex=-1;
+    let questions = [];
+    let wrongQuestionsArray = [];
+
 
     // Fetch the text file
-    fetch('questions.txt')
-      .then(response => response.text())
-      .then(data => {
-        questionsData = parseQuizData(data);
-        createQuiz(questionsData);
-      })
-      .catch(error => console.error(error));
+    
 
     // Parse the quiz data from text file
     function parseQuizData(data) {
       const lines = data.split('\n');
-      let questions = [];
       let currentQuestion = {};
 
       lines.forEach(line => {
@@ -124,7 +145,7 @@
       shuffleArray(questions);
 
 
-      const quizContainer = document.getElementById('quiz');
+      
       let quizHTML = '';
 
       questions.forEach((question, index) => {
@@ -157,6 +178,7 @@
     // Check the answer
     function checkAnswer(questionIndex, selectedOption) {
       const question = questionsData[questionIndex];
+      console.log(questionsData);
       const feedbackElement = document.getElementById(`feedback${questionIndex}`);
 
       console.log(question.answer + " " + selectedOption);
@@ -165,8 +187,46 @@
         feedbackElement.textContent = 'Correct!';
         feedbackElement.style.color = 'green';
       } else {
-        feedbackElement.textContent = 'Wrong!';
+        feedbackElement.textContent = 'Wrong! Correct answer is ' + question.answer ;
         feedbackElement.style.color = 'red';
+        console.log(question);
+
+
+        if(questionIndex== lastAddedWrongIndex){
+          return;
+        }
+
+
+        wrongQuestionsArray.push(question);
+
+        
+        lastAddedWrongIndex = questionIndex;
+
+        const optionsHTML = question.options.map((option, optionIndex) => `
+          <label>
+            <input type="radio" class="" name="question${questionIndex}" value="${option}" onclick="checkAnswer(${questionIndex}, '${option}')">
+            ${option}
+          </label>
+        `).join('');
+
+        
+
+        const questionHTML = `
+          <div>
+            <h2>Question ${questionIndex + 1}</h2>
+            <p>${question.question}</p>
+            <div>
+              ${optionsHTML}
+            </div>
+            <p id="feedback${questionIndex}"></p>
+          </div>
+        `;
+
+        quizContainer.innerHTML += questionHTML;
+
+
+      
+
       }
     }
 
@@ -215,47 +275,17 @@
 
 
 
-    function showQuestionStatus() {
-      const quizContainer = document.getElementById('quiz');
-      let statusHTML = '';
+  
 
-      const rightQuestions = questionsData.filter(question => {
-        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
-        return selectedOption && selectedOption.value === question.answer;
-      });
 
-      const wrongQuestions = questionsData.filter(question => {
-        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
-        return selectedOption && selectedOption.value !== question.answer;
-      });
 
-      const unansweredQuestions = questionsData.filter(question => {
-        const selectedOption = document.querySelector(`input[name="question${questionsData.indexOf(question)}"]:checked`);
-        return !selectedOption;
-      });
+    function showWrongQuestions(){
+        console.log(wrongQuestionsArray);
+        questionsData.splice(0, questionsData.length, ...wrongQuestionsArray);
 
-      statusHTML += `<h2>Right Questions</h2>`;
-      rightQuestions.forEach(question => {
-        statusHTML += `<p>${question.question}</p>`;
-      });
+        createQuiz(questionsData);
 
-      statusHTML += `<h2>Wrong Questions</h2>`;
-      wrongQuestions.forEach(question => {
-        statusHTML += `<p>${question.question}</p>`;
-      });
-
-      statusHTML += `<h2>Unanswered Questions</h2>`;
-      unansweredQuestions.forEach(question => {
-        statusHTML += `<p>${question.question}</p>`;
-      });
-
-      quizContainer.innerHTML = statusHTML;
     }
-
-
-
-
-
     
 
 
