@@ -1,0 +1,87 @@
+<!-- code in which hindi is not taken  -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF Text Extraction</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
+</head>
+<body>
+  <input type="file" id="pdfFile" accept=".pdf" />
+  <div>
+    <label for="startPage">Start Page:</label>
+    <input type="number" id="startPage" min="1" value="1" />
+  </div>
+  <div>
+    <label for="endPage">End Page:</label>
+    <input type="number" id="endPage" min="1" value="1" />
+  </div>
+  <button onclick="extractText()">Extract Text</button>
+  <div id="output"></div>
+  <div id="spinner" style="display: none;">Converting...</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.worker.min.js';
+
+function extractText() {
+  var fileInput = document.getElementById('pdfFile');
+  var file = fileInput.files[0];
+  var startPageInput = document.getElementById('startPage');
+  var endPageInput = document.getElementById('endPage');
+  var startPage = parseInt(startPageInput.value, 10);
+
+  var reader = new FileReader();
+
+  reader.onload = function(e) {
+    var buffer = new Uint8Array(e.target.result);
+
+    pdfjsLib.getDocument(buffer).promise.then(function(pdf) {
+      var numPages = pdf.numPages;
+      endPageInput.value = numPages; // Set the value of "End Page" input to the number of pages
+
+      var extractedText = '';
+      var counter = 0;
+
+      var spinnerDiv = document.getElementById('spinner');
+      spinnerDiv.style.display = 'block';
+
+      for (var i = startPage; i <= numPages; i++) { // Loop until the number of pages
+        pdf.getPage(i).then(function(page) {
+          page.getTextContent().then(function(textContent) {
+            var pageText = '';
+
+            textContent.items.forEach(function(item) {
+              // Exclude Hindi characters using a regular expression
+              var hindiRegex = /^[\u0900-\u097F\s]+$/;
+              if (!hindiRegex.test(item.str)) {
+                pageText += item.str+ '<br>';
+              }
+            });
+
+            // Check if the page text starts with a number
+            if (/^\d/.test(pageText)) {
+              extractedText += pageText + '<br><hr>';
+            }
+
+            counter++;
+
+            if (counter === numPages - startPage + 1) {
+              var outputDiv = document.getElementById('output');
+              outputDiv.innerHTML = extractedText;
+              spinnerDiv.style.display = 'none';
+            }
+          });
+        });
+      }
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+
+
+  </script>
+</body>
+</html>
