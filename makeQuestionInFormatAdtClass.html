@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Q and Z</title>
+  <style>
+    textarea {
+      width: 400px;
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Add Q and Z</h2>
+  <textarea id="inputText" placeholder="Paste your text here"></textarea>
+  <br>
+  <button onclick="processText()">Process</button>
+  <button onclick="copyText()" id="copyButton" disabled>Copy</button>
+  <br>
+  <textarea id="outputText" placeholder="Modified text will appear here" readonly></textarea>
+
+  <script>
+    function addQAndZ(text) {
+      var lines = text.split('\n');
+      var result = [];
+      var previousLineEmpty = false;
+      var i=0;
+      var line1 ="";
+      var option ="";
+
+      while ( i < lines.length ) {
+         var line = lines[i];
+         
+
+
+        
+let firstTwoLetters = line.slice(0, 2);
+let lastTwoletters = line.slice(-1);
+
+
+
+if (/^\d/.test(line)  ) {
+  line = line.replace(firstTwoLetters, "Q ");
+   line1= line;
+    
+  // while(line[i+1].slice(0, 2) != "A."){
+  //   line1 += line[i+1];
+  //   i++;
+  // }
+
+  //result.push(line1);
+
+ }
+
+else if (firstTwoLetters == "A."){
+  result.push(line1);
+  line = "A) "+ line.substring(2,line.length);
+  if(lastTwoletters == "*"){
+    option="a";
+    line =line.substring(0, line.length - 2);
+  }
+  
+  result.push(line);
+}else if (firstTwoLetters == "B."){
+  line = "B) "+ line.substring(2,line.length);
+  if(lastTwoletters == "*"){
+    option="b";
+    line =line.substring(0, line.length - 2);
+  }
+
+  result.push(line);
+} else if (firstTwoLetters == "C."){
+  line = "C) "+ line.substring(2,line.length);
+
+  if(lastTwoletters == "*"){
+    option="c";
+    line =line.substring(0, line.length - 2);
+  }
+
+  result.push(line);
+}else if (firstTwoLetters == "D."){
+  line = "D) "+ line.substring(2,line.length);
+
+  if(lastTwoletters == "*"){
+    option="d";
+    line =line.substring(0, line.length - 2);
+  }
+  result.push(line);
+  result.push("Z "+option);
+}
+
+ 
+ else {
+  
+   line1 =line1+ " " + line;
+  
+
+ }
+
+
+
+
+
+
+        i++;
+      }
+
+      return result.join('\n');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function processText() {
+      var inputText = document.getElementById('inputText').value;
+      var outputText = document.getElementById('outputText');
+      var copyButton = document.getElementById('copyButton');
+
+      var modifiedText = addQAndZ(inputText);
+      outputText.value = modifiedText;
+
+      if (modifiedText !== '') {
+        copyButton.disabled = false;
+      } else {
+        copyButton.disabled = true;
+      }
+
+    }
+
+    function copyText() {
+      var outputText = document.getElementById('outputText');
+      outputText.select();
+      document.execCommand('copy');
+    }
+  </script>
+</body>
+</html>
